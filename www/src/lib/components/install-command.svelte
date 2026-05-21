@@ -36,11 +36,13 @@ const res = await chat.completeChat(
 console.log(res.choices[0]?.message?.content);`,
 		csharp: `using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging.Abstractions;
+using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 await FoundryLocalManager.CreateAsync(
     new Configuration { AppName = "my-app" },
     NullLogger.Instance);
 var catalog = await FoundryLocalManager.Instance.GetCatalogAsync();
-var model = await catalog.GetModelAsync("qwen2.5-0.5b");
+var model = await catalog.GetModelAsync("qwen2.5-0.5b")
+    ?? throw new Exception("Model not found.");
 await model.DownloadAsync(); await model.LoadAsync();
 var client = await model.GetChatClientAsync();
 var res = await client.CompleteChatAsync(new[] {
@@ -88,8 +90,12 @@ println!("{}", res.choices[0].message.content
 			await navigator.clipboard.writeText(currentCommand);
 			copied = true;
 			toast.success('Copied to clipboard!');
-			setTimeout(() => { showCodeSnippet = true; }, 400);
-			setTimeout(() => { copied = false; }, 2000);
+			setTimeout(() => {
+				showCodeSnippet = true;
+			}, 400);
+			setTimeout(() => {
+				copied = false;
+			}, 2000);
 		} catch (err) {
 			toast.error('Failed to copy to clipboard');
 		}
@@ -100,7 +106,9 @@ println!("{}", res.choices[0].message.content
 			await navigator.clipboard.writeText(codeSnippets[activeTab]);
 			copiedCode = true;
 			toast.success('Copied code snippet!');
-			setTimeout(() => { copiedCode = false; }, 2000);
+			setTimeout(() => {
+				copiedCode = false;
+			}, 2000);
 		} catch (err) {
 			toast.error('Failed to copy to clipboard');
 		}
@@ -119,10 +127,14 @@ println!("{}", res.choices[0].message.content
 		{#each Object.entries(tabLabels) as [key, label]}
 			<button
 				type="button"
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 {activeTab === key
+				class="rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 {activeTab ===
+				key
 					? 'bg-primary text-primary-foreground shadow-sm'
 					: 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
-				onclick={() => { activeTab = key as 'python' | 'javascript' | 'csharp' | 'rust'; showCodeSnippet = false; }}
+				onclick={() => {
+					activeTab = key as 'python' | 'javascript' | 'csharp' | 'rust';
+					showCodeSnippet = false;
+				}}
 			>
 				{label}
 			</button>
@@ -141,7 +153,7 @@ println!("{}", res.choices[0].message.content
 				</div>
 				<code
 					bind:this={commandElement}
-					class="text-foreground flex-1 select-all overflow-x-auto font-mono text-xs sm:text-sm"
+					class="text-foreground flex-1 overflow-x-auto font-mono text-xs select-all sm:text-sm"
 					style="scrollbar-width: thin;"
 				>
 					{currentCommand}
@@ -149,7 +161,7 @@ println!("{}", res.choices[0].message.content
 				<button
 					type="button"
 					onclick={copyCommand}
-					class="bg-primary/10 text-primary hover:bg-primary/20 focus:ring-primary flex shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:px-2.5"
+					class="bg-primary/10 text-primary hover:bg-primary/20 focus:ring-primary flex shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:outline-none sm:px-2.5"
 					aria-label="Copy installation command"
 				>
 					{#if copied}
@@ -174,11 +186,14 @@ println!("{}", res.choices[0].message.content
 			<div
 				class="border-primary/30 bg-background/50 group relative rounded-md border transition-all duration-300"
 			>
-				<pre class="text-foreground overflow-x-auto p-3 font-mono text-[10px] leading-relaxed sm:text-xs"><code>{codeSnippets[activeTab]}</code></pre>
+				<pre
+					class="text-foreground overflow-x-auto p-3 font-mono text-[10px] leading-relaxed sm:text-xs"><code
+						>{codeSnippets[activeTab]}</code
+					></pre>
 				<button
 					type="button"
 					onclick={copyCodeSnippet}
-					class="bg-primary/10 text-primary hover:bg-primary/20 focus:ring-primary absolute top-2 right-2 flex shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
+					class="bg-primary/10 text-primary hover:bg-primary/20 focus:ring-primary absolute top-2 right-2 flex shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs font-medium transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:outline-none"
 					aria-label="Copy code snippet"
 				>
 					{#if copiedCode}
@@ -192,7 +207,12 @@ println!("{}", res.choices[0].message.content
 
 		<!-- CLI note -->
 		<p class="text-muted-foreground text-center text-[10px]">
-			For interactive development, install the <a href="https://learn.microsoft.com/en-us/azure/foundry-local/reference/reference-cli" target="_blank" rel="noopener noreferrer" class="underline hover:text-foreground">CLI</a> separately.
+			For interactive development, install the <a
+				href="https://learn.microsoft.com/en-us/azure/foundry-local/reference/reference-cli"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="hover:text-foreground underline">CLI</a
+			> separately.
 		</p>
 	</div>
 </div>
